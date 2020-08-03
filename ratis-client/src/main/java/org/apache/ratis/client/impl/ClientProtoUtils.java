@@ -401,7 +401,8 @@ public interface ClientProtoUtils {
       case GROUPREMOVE:
         final GroupRemoveRequestProto remove = p.getGroupRemove();
         return GroupManagementRequest.newRemove(clientId, serverId, m.getCallId(),
-            ProtoUtils.toRaftGroupId(remove.getGroupId()), remove.getDeleteDirectory());
+            ProtoUtils.toRaftGroupId(remove.getGroupId()),
+            remove.getDeleteDirectory(), remove.getRenameDirectory());
       default:
         throw new IllegalArgumentException("Unexpected op " + p.getOpCase() + " in " + p);
     }

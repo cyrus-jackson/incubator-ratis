@@ -197,7 +197,7 @@ public abstract class GroupManagementBaseTest extends BaseTest {
 
           final RaftClientReply r;
           try (final RaftClient client = cluster.createClient(p.getId(), g)) {
-            r = client.groupRemove(g.getGroupId(), true, p.getId());
+            r = client.groupRemove(g.getGroupId(), true, false, p.getId());
           }
           Assert.assertTrue(r.isSuccess());
           Assert.assertFalse(root.exists());
@@ -282,7 +282,7 @@ public abstract class GroupManagementBaseTest extends BaseTest {
         Assert.assertEquals(groupIds1.size(), 2);
 
         // Group2 is removed from the peerId of Group1
-        client.groupRemove(group2.getGroupId(), false, peerId1);
+        client.groupRemove(group2.getGroupId(), false, false, peerId1);
 
         groupIds1 = cluster1.getServer(peerId1).getGroupIds();
         // The size is 1 since the cluster1 hasn't been restarted
