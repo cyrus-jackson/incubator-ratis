@@ -109,7 +109,7 @@ public class RaftServerProxy implements RaftServer {
       }
       isClosed = true;
       map.values().parallelStream().map(CompletableFuture::join)
-          .forEach(impl -> impl.shutdown(false));
+          .forEach(RaftServerImpl::shutdown);
     }
 
     synchronized List<RaftGroupId> getGroupIds() {
@@ -415,7 +415,7 @@ public class RaftServerProxy implements RaftServer {
     }
     return f.thenApply(impl -> {
       final Collection<CommitInfoProto> commitInfos = impl.getCommitInfos();
-      impl.groupRemove(deleteDirectory);
+      impl.groupRemove(deleteDirectory, true);
       impl.getStateMachine().notifyGroupRemove();
       return new RaftClientReply(request, commitInfos);
     });

@@ -267,14 +267,25 @@ public class RaftServerImpl implements RaftServerProtocol, RaftServerAsynchronou
    * If the flag is true, the group is permanently deleted.
    * @param deleteDirectory
    */
-  public void groupRemove(boolean deleteDirectory) {
+  public void groupRemove(boolean deleteDirectory, boolean renameDirectory) {
     final RaftStorageDirectory dir = state.getStorage().getStorageDir();
 
     /* Shutdown is triggered here inorder to avoid any locked files. */
-    shutdown(deleteDirectory);
-
-    if(!deleteDirectory && RaftServerConfigKeys.moveRemovedGroupsEnabled
-        (proxy.getProperties())) {
+    shutdown();
+    if (deleteDirectory) {
+      for (int i = 0; i < FileUtils.NUM_ATTEMPTS; i ++) {
+        try {
+          FileUtils.deleteFully(dir.getRoot());
+          LOG.info("{}: Succeed to remove RaftStorageDirectory {}", getMemberId(), dir);
+          break;
+        } catch (NoSuchFileException e) {
+          LOG.warn("{}: Some file does not exist {}", getMemberId(), dir, e);
+        } catch (Exception ignored) {
+          LOG.error("{}: Failed to remove RaftStorageDirectory {}", getMemberId(), dir, ignored);
+          break;
+        }
+      }
+    } else if(renameDirectory) {
       try {
         /* Create path with current group in REMOVED_GROUPS_DIR_KEY location */
         File toBeRemovedGroupFolder = new File(RaftServerConfigKeys
@@ -292,7 +303,7 @@ public class RaftServerImpl implements RaftServerProtocol, RaftServerAsynchronou
     }
   }
 
-  public void shutdown(boolean deleteDirectory) {
+  public void shutdown() {
     lifeCycle.checkStateAndClose(() -> {
       LOG.info("{}: shutdown", getMemberId());
       try {
@@ -326,21 +337,6 @@ public class RaftServerImpl implements RaftServerProtocol, RaftServerAsynchronou
         RaftServerMetrics.removeRaftServerMetrics(this);
       } catch (Exception ignored) {
         LOG.warn("{}: Failed to unregister metric", getMemberId(), ignored);
-      }
-      if (deleteDirectory) {
-        final RaftStorageDirectory dir = state.getStorage().getStorageDir();
-        for (int i = 0; i < FileUtils.NUM_ATTEMPTS; i ++) {
-          try {
-            FileUtils.deleteFully(dir.getRoot());
-            LOG.info("{}: Succeed to remove RaftStorageDirectory {}", getMemberId(), dir);
-            break;
-          } catch (NoSuchFileException e) {
-            LOG.warn("{}: Some file does not exist {}", getMemberId(), dir, e);
-          } catch (Exception ignored) {
-            LOG.error("{}: Failed to remove RaftStorageDirectory {}", getMemberId(), dir, ignored);
-            break;
-          }
-        }
       }
     });
   }
