@@ -71,7 +71,9 @@ public final class GroupManagementRequest extends RaftClientRequest {
 
     @Override
     public String toString() {
-      return getClass().getSimpleName() + ":" + getGroupId() + ", " + (deleteDirectory? "delete": "retain") + "-dir";
+      return getClass().getSimpleName() + ":" + getGroupId() + ", "
+          + (deleteDirectory? "delete": (renameDirectory ? "rename" : "retain"))
+          + "-dir";
     }
   }
 

@@ -442,6 +442,7 @@ public interface ClientProtoUtils {
       b.setGroupRemove(GroupRemoveRequestProto.newBuilder()
           .setGroupId(ProtoUtils.toRaftGroupIdProtoBuilder(remove.getGroupId()))
           .setDeleteDirectory(remove.isDeleteDirectory())
+          .setRenameDirectory(remove.isRenameDirectory())
           .build());
     }
     return b.build();
