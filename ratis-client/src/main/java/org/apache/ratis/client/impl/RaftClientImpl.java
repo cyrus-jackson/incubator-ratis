@@ -401,8 +401,8 @@ public final class RaftClientImpl implements RaftClient {
 
   void handleIOException(RaftClientRequest request, IOException ioe,
       RaftPeerId newLeader, Consumer<RaftClientRequest> handler) {
-    LOG.debug("{}: suggested new leader: {}. Failed {} with {}",
-        clientId, newLeader, request, ioe);
+//    LOG.debug("{}: suggested new leader: {}. Failed {} with {}",
+//        clientId, newLeader, request, ioe);
     if (LOG.isTraceEnabled()) {
       LOG.trace("Stack trace", new Throwable("TRACE"));
     }
@@ -420,14 +420,14 @@ public final class RaftClientImpl implements RaftClient {
       newLeader = CollectionUtils.random(oldLeader,
           CollectionUtils.as(peers, RaftPeer::getId));
     }
-    LOG.debug("{}: oldLeader={},  curLeader={}, newLeader={}", clientId, oldLeader, curLeader, newLeader);
+//    LOG.debug("{}: oldLeader={},  curLeader={}, newLeader={}", clientId, oldLeader, curLeader, newLeader);
 
     final boolean changeLeader = newLeader != null && stillLeader;
     final boolean reconnect = changeLeader || clientRpc.shouldReconnect(ioe);
     if (reconnect) {
       if (changeLeader && oldLeader.equals(leaderId)) {
-        LOG.debug("{} {}: client change Leader from {} to {} ex={}", groupId,
-            clientId, oldLeader, newLeader, ioe.getClass().getName());
+//        LOG.debug("{} {}: client change Leader from {} to {} ex={}", groupId,
+//            clientId, oldLeader, newLeader, ioe.getClass().getName());
         this.leaderId = newLeader;
       }
       clientRpc.handleException(oldLeader, ioe, true);

@@ -189,12 +189,16 @@ public class CounterStateMachine extends BaseStateMachine {
       return CompletableFuture.completedFuture(
           Message.valueOf("Invalid Command"));
     }
+
     //update the last applied term and index
     final long index = entry.getIndex();
     updateLastAppliedTermIndex(entry.getTerm(), index);
 
     //actual execution of the command: increment the counter
     counter.incrementAndGet();
+    try {
+      Thread.sleep(5000);
+    } catch (Exception ignore) {}
 
     //return the new value of the counter to the client
     final CompletableFuture<Message> f =

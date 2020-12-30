@@ -40,8 +40,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,6 +126,8 @@ public final class OrderedAsync {
   private final ConcurrentMap<String, SlidingWindow.Client<PendingOrderedRequest, RaftClientReply>> slidingWindows
       = new ConcurrentHashMap<>();
   private final Semaphore requestSemaphore;
+  private final Queue queue = new LinkedList<>();
+
 
   private OrderedAsync(RaftClientImpl client, RaftProperties properties) {
     this.client = Objects.requireNonNull(client, "client == null");
@@ -156,7 +160,9 @@ public final class OrderedAsync {
       Objects.requireNonNull(message, "message == null");
     }
     try {
+      System.out.println("Waiting for " + message);
       requestSemaphore.acquire();
+      System.out.println("Done Waiting for " + message);
     } catch (InterruptedException e) {
       return JavaUtils.completeExceptionally(IOUtils.toInterruptedIOException(
           "Interrupted when sending " + type + ", message=" + message, e));
